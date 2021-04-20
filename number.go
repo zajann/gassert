@@ -57,10 +57,6 @@ func float64Equals(a float64, b float64) bool {
 	return a == b
 }
 
-func float64Zero(a float64) bool {
-	return float64Equals(a, 0)
-}
-
 func float64Greater(a float64, b float64) bool {
 	return a > b
 }
@@ -75,28 +71,4 @@ func float64Less(a float64, b float64) bool {
 
 func float64LessOrEquals(a float64, b float64) bool {
 	return float64Equals(a, b) || float64Less(a, b)
-}
-
-func uint64Equals(a uint64, b uint64) bool {
-	return a == b
-}
-
-func uint64Zero(a uint64) bool {
-	return uint64Equals(a, 0)
-}
-
-func uint64Greater(a uint64, b uint64) bool {
-	return a > b
-}
-
-func uint64GreaterOrEquals(a uint64, b uint64) bool {
-	return uint64Equals(a, b) || uint64Greater(a, b)
-}
-
-func uint64Less(a uint64, b uint64) bool {
-	return a < b
-}
-
-func uint64LessOrEquals(a uint64, b uint64) bool {
-	return uint64Equals(a, b) || uint64Less(a, b)
 }

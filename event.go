@@ -1,11 +1,13 @@
 package gassert
 
 import (
-	"errors"
 	"fmt"
 	"reflect"
+	"runtime"
 	"sync"
 )
+
+// panic only here
 
 var eventPool = &sync.Pool{
 	New: func() interface{} {
@@ -71,7 +73,20 @@ func (e *Event) Equals(x, y interface{}) *Event {
 	return e
 }
 
-func (e *Event) Less(x, y interface{}) *Event {
+func (e *Event) NotEquals(x, y interface{}) *Event {
+	before := len(e.errs)
+	e = e.Equals(x, y)
+	after := len(e.errs)
+
+	if after == before {
+		e.addError("not equals")
+	} else {
+		e.errs = e.errs[:after-1]
+	}
+	return e
+}
+
+func (e *Event) NumLess(x, y interface{}) *Event {
 	xx, yy, ok := parseToFloat64s(x, y)
 	if ok {
 		if float64Less(xx, yy) {
@@ -83,7 +98,7 @@ func (e *Event) Less(x, y interface{}) *Event {
 	return e
 }
 
-func (e *Event) LessOrEquals(x, y interface{}) *Event {
+func (e *Event) NumLessOrEquals(x, y interface{}) *Event {
 	xx, yy, ok := parseToFloat64s(x, y)
 	if ok {
 		if float64LessOrEquals(xx, yy) {
@@ -95,7 +110,7 @@ func (e *Event) LessOrEquals(x, y interface{}) *Event {
 	return e
 }
 
-func (e *Event) Greater(x, y interface{}) *Event {
+func (e *Event) NumGreater(x, y interface{}) *Event {
 	xx, yy, ok := parseToFloat64s(x, y)
 	if ok {
 		if float64Greater(xx, yy) {
@@ -107,14 +122,21 @@ func (e *Event) Greater(x, y interface{}) *Event {
 	return e
 }
 
-func (e *Event) GreaterOrEquals(x, y interface{}) *Event {
+func (e *Event) NumGreaterOrEquals(x, y interface{}) *Event {
 	xx, yy, ok := parseToFloat64s(x, y)
 	if ok {
 		if float64GreaterOrEquals(xx, yy) {
 			e.addError("number less")
 		}
 	} else {
-		panic("gassert.GreaterOrEquals: only numbers available")
+		panic("gassert.GreaterOrEquals: only numbers acceptable")
+	}
+	return e
+}
+
+func (e *Event) SliceLenEquals(x []interface{}, n int) *Event {
+	if sliceLenEquals(x, n) {
+		e.addError("Slice Length Equals")
 	}
 	return e
 }
@@ -129,7 +151,10 @@ func (e *Event) Panic() {
 func (e *Event) Err() error {
 	defer putEvent(e)
 	if len(e.errs) > 0 {
-		return errors.New("error")
+		pc, _, _, _ := runtime.Caller(1)
+		callerName := runtime.FuncForPC(pc).Name()
+
+		return fmt.Errorf("gAssertError: %s", callerName)
 	}
 	return nil
 }
