@@ -1,0 +1,52 @@
+Common
+	- zero
+	- equals
+	- not equals
+
+Number (regradless of type)
+	- less
+	- less or equals
+	- greater 
+	- greater or equals
+
+String
+	- string len equals
+	- string len not equals
+	- string len less
+	- string len less or equals
+	- string len greater
+	- string len greater or equals
+
+Array
+	- len equals
+	- len not equals
+	- len less
+	- len less or equals
+	- len greater
+	- len greater or equals
+	
+Slice
+	- len equals
+	- len not equals
+	- len less
+	- len less or equals
+	- len greater
+	- len greater or equals
+	- cap equals
+	- cap not equals
+	- cap less
+	- cap less or equals
+	- cap greater
+	- cap greater or equals
+
+Map
+	- len equals
+	- len not equals
+	- len less
+	- len less or equals
+	- len greater
+	- len greater or equals
+	- has key
+	- not has key
+
+
