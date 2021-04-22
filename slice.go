@@ -1,22 +1,32 @@
 package gassert
 
-// FIXME: ALL
-func sliceLenEquals(x []interface{}, n int) bool {
-	return len(x) == n
+import "reflect"
+
+func isSlice(x interface{}) bool {
+	return reflect.ValueOf(x).Kind() == reflect.Slice
 }
 
-func sliceLenLess(x []interface{}, n int) bool {
-	return len(x) < n
+func sliceCapEquals(a interface{}, b int) bool {
+	val := reflect.ValueOf(a)
+	return val.Cap() == b
 }
 
-func sliceLenLessOrEquals(x []interface{}, n int) bool {
-	return len(x) <= n
+func sliceCapLess(a interface{}, b int) bool {
+	val := reflect.ValueOf(a)
+	return val.Cap() < b
 }
 
-func sliceLenGreater(x []interface{}, n int) bool {
-	return len(x) > n
+func sliceCapLessOrEquals(a interface{}, b int) bool {
+	val := reflect.ValueOf(a)
+	return val.Cap() <= b
 }
 
-func sliceLenGreaterOrEquals(x []interface{}, n int) bool {
-	return len(x) >= n
+func sliceCapGreater(a interface{}, b int) bool {
+	val := reflect.ValueOf(a)
+	return val.Cap() > b
+}
+
+func sliceCapGreaterOrEquals(a interface{}, b int) bool {
+	val := reflect.ValueOf(a)
+	return val.Cap() >= b
 }
