@@ -99,6 +99,22 @@ func SliceLenLessOrEquals(s interface{}, n int) {
 	New().SliceLenLessOrEquals(s, n).Panic()
 }
 
+func SliceLenGreater(s interface{}, n int) {
+	New().SliceLenGreater(s, n).Panic()
+}
+
+func SliceLenGreaterOrEquals(s interface{}, n int) {
+	New().SliceLenGreaterOrEquals(s, n).Panic()
+}
+
+func SliceCapEquals(s interface{}, n int) {
+	New().SliceCapEquals(s, n).Panic()
+}
+
+func SliceCapNotEquals(s interface{}, n int) {
+	New().SliceCapNotEquals(s, n).Panic()
+}
+
 func SliceCapLess(s interface{}, n int) {
 	New().SliceCapLess(s, n).Panic()
 }
