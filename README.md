@@ -76,11 +76,11 @@ It may lose type-safety, but i thougth it is better idea for convenience.
 
 - #### Thread-Safety
 
-`gassert` is thread-safety because it makes internal event object every calls. And the object is managed by `sync.Pool`, so it is eco-nomical in memory usage.
+`gassert` is thread-safety because it makes internal event object every calls. And the object is managed by `sync.Pool`, so it is economical in memory usage.
 
 - #### Complex condition
 
-If you want to check complex condition whitch doesn't exists in `gassert`. You can just use `Go()`.
+If you want to check complex condition which doesn't exists in `gassert`. You can just use `Go()`.
 
 ```go
 func MyFunc(n int, s string) {
