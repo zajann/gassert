@@ -38,7 +38,7 @@ func (e *Event) Zeros(xs ...interface{}) *Event {
 	for _, x := range xs {
 		val := reflect.ValueOf(x)
 		if val.IsZero() {
-			e.addError("zero-values in %s", val.Kind().String())
+			e.appendError(zeroValueError(val.Kind().String()))
 		}
 	}
 	return e
@@ -46,7 +46,7 @@ func (e *Event) Zeros(xs ...interface{}) *Event {
 
 func (e *Event) DeepEqual(x, y interface{}) *Event {
 	if reflect.DeepEqual(x, y) {
-		e.addError("deep equals")
+		e.appendError(equalsError(reflect.ValueOf(x).Kind().String()))
 	}
 	return e
 }
@@ -55,7 +55,7 @@ func (e *Event) Equals(x, y interface{}) *Event {
 	xx, yy, ok := parseToFloat64s(x, y)
 	if ok {
 		if float64Equals(xx, yy) {
-			e.addError("number less")
+			e.appendError(equalsError("number"))
 		}
 	} else {
 		xVal := reflect.ValueOf(x)
@@ -63,7 +63,7 @@ func (e *Event) Equals(x, y interface{}) *Event {
 		case reflect.String:
 			if yy, ok := y.(string); ok {
 				if stringEquals(xVal.String(), yy) {
-					e.addError("string equals")
+					e.appendError(equalsError("string"))
 				}
 			}
 		default:
@@ -79,7 +79,12 @@ func (e *Event) NotEquals(x, y interface{}) *Event {
 	after := len(e.errs)
 
 	if after == before {
-		e.addError("not equals")
+		val := reflect.ValueOf(x)
+		kind := val.Kind().String()
+		if isNumber(val) {
+			kind = "number"
+		}
+		e.appendError(notEqualsError(kind))
 	} else {
 		e.errs = e.errs[:after-1]
 	}
@@ -90,10 +95,10 @@ func (e *Event) NumLess(x, y interface{}) *Event {
 	xx, yy, ok := parseToFloat64s(x, y)
 	if ok {
 		if float64Less(xx, yy) {
-			e.addError("number less")
+			e.appendError(numLessError)
 		}
 	} else {
-		panic("gassert.Less: only numbers available")
+		panic("gassert.Event.Less: only numbers acceptable")
 	}
 	return e
 }
@@ -102,10 +107,10 @@ func (e *Event) NumLessOrEquals(x, y interface{}) *Event {
 	xx, yy, ok := parseToFloat64s(x, y)
 	if ok {
 		if float64LessOrEquals(xx, yy) {
-			e.addError("number less")
+			e.appendError(numLessOrEqualsError)
 		}
 	} else {
-		panic("gassert.LessOrEquals: only numbers available")
+		panic("gassert.Event.LessOrEquals: only numbers acceptable")
 	}
 	return e
 }
@@ -114,10 +119,10 @@ func (e *Event) NumGreater(x, y interface{}) *Event {
 	xx, yy, ok := parseToFloat64s(x, y)
 	if ok {
 		if float64Greater(xx, yy) {
-			e.addError("number less")
+			e.appendError(numGreaterError)
 		}
 	} else {
-		panic("gassert.Greater: only numbers available")
+		panic("gassert.Event.Greater: only numbers acceptable")
 	}
 	return e
 }
@@ -126,316 +131,316 @@ func (e *Event) NumGreaterOrEquals(x, y interface{}) *Event {
 	xx, yy, ok := parseToFloat64s(x, y)
 	if ok {
 		if float64GreaterOrEquals(xx, yy) {
-			e.addError("number less")
+			e.appendError(numGreaterOrEqualsError)
 		}
 	} else {
-		panic("gassert.GreaterOrEquals: only numbers acceptable")
+		panic("gassert.Event.GreaterOrEquals: only numbers acceptable")
 	}
 	return e
 }
 
 func (e *Event) StrLenEquals(s string, n int) *Event {
 	if lenEquals(s, n) {
-		e.addError("string length equals")
+		e.appendError(lenEqualsError("string"))
 	}
 	return e
 }
 
 func (e *Event) StrLenNotEquals(s string, n int) *Event {
 	if !lenEquals(s, n) {
-		e.addError("string length not equals")
+		e.appendError(lenNotEqualsError("string"))
 	}
 	return e
 }
 
 func (e *Event) StrLenLess(s string, n int) *Event {
 	if lenLess(s, n) {
-		e.addError(" length less than")
+		e.appendError(lenLessError("string"))
 	}
 	return e
 }
 
 func (e *Event) StrLenLessOrEquals(s string, n int) *Event {
 	if lenLessOrEquals(s, n) {
-		e.addError(" length less than")
+		e.appendError(lenLessOrEqualsError("string"))
 	}
 	return e
 }
 
 func (e *Event) StrLenGreater(s string, n int) *Event {
 	if lenGreater(s, n) {
-		e.addError(" length less than")
+		e.appendError(lenGreaterError("string"))
 	}
 	return e
 }
 
 func (e *Event) StrLenGreaterOrEquals(s string, n int) *Event {
 	if lenGreaterOrEquals(s, n) {
-		e.addError(" length less than")
+		e.appendError(lenGreaterOrEqualsError("string"))
 	}
 	return e
 }
 
 func (e *Event) ArrLenEquals(x interface{}, n int) *Event {
 	if !isArray(x) {
-		panic("gassert.ArrLenEquals: only array type acceptable")
+		panic("gassert.Event.ArrLenEquals: only array type acceptable")
 	}
 
 	if lenEquals(x, n) {
-		e.addError("array length equals")
+		e.appendError(lenEqualsError("array"))
 	}
 	return e
 }
 
 func (e *Event) ArrLenNotEquals(x interface{}, n int) *Event {
 	if !isArray(x) {
-		panic("gassert.ArrLenNotEquals: only array type acceptable")
+		panic("gassert.Event.ArrLenNotEquals: only array type acceptable")
 	}
 
 	if !lenEquals(x, n) {
-		e.addError("array length not equals")
+		e.appendError(lenNotEqualsError("array"))
 	}
 	return e
 }
 
 func (e *Event) ArrLenLess(x interface{}, n int) *Event {
 	if !isArray(x) {
-		panic("gassert.ArrLenLess: only array type acceptable")
+		panic("gassert.Event.ArrLenLess: only array type acceptable")
 	}
 
 	if lenLess(x, n) {
-		e.addError("array length equals")
+		e.appendError(lenLessError("array"))
 	}
 	return e
 }
 
 func (e *Event) ArrLenLessOrEquals(x interface{}, n int) *Event {
 	if !isArray(x) {
-		panic("gassert.ArrLenLessOrEquals: only array type acceptable")
+		panic("gassert.Event.ArrLenLessOrEquals: only array type acceptable")
 	}
 
 	if lenLessOrEquals(x, n) {
-		e.addError("array length equals")
+		e.appendError(lenLessOrEqualsError("array"))
 	}
 	return e
 }
 
 func (e *Event) ArrLenGreater(x interface{}, n int) *Event {
 	if !isArray(x) {
-		panic("gassert.ArrLenGreater: only array type acceptable")
+		panic("gassert.Event.ArrLenGreater: only array type acceptable")
 	}
 
 	if lenGreater(x, n) {
-		e.addError("array length equals")
+		e.appendError(lenGreaterError("array"))
 	}
 	return e
 }
 
 func (e *Event) ArrLenGreaterOrEquals(x interface{}, n int) *Event {
 	if !isArray(x) {
-		panic("gassert.ArrLenGreaterOrEquals: only array type acceptable")
+		panic("gassert.Event.ArrLenGreaterOrEquals: only array type acceptable")
 	}
 
 	if lenGreaterOrEquals(x, n) {
-		e.addError("array length equals")
+		e.appendError(lenGreaterOrEqualsError("array"))
 	}
 	return e
 }
 
 func (e *Event) SliceLenEquals(x interface{}, n int) *Event {
 	if !isSlice(x) {
-		panic("gassert.SliceLenEquals: only slice type acceptable")
+		panic("gassert.Event.SliceLenEquals: only slice type acceptable")
 	}
 
 	if lenEquals(x, n) {
-		e.addError("slice length equals")
+		e.appendError(lenEqualsError("slice"))
 	}
 	return e
 }
 
 func (e *Event) SliceLenNotEquals(x interface{}, n int) *Event {
 	if !isSlice(x) {
-		panic("gassert.SliceLenNotEquals: only slice type acceptable")
+		panic("gassert.Event.SliceLenNotEquals: only slice type acceptable")
 	}
 
 	if !lenEquals(x, n) {
-		e.addError("slice length not equals")
+		e.appendError(lenNotEqualsError("slice"))
 	}
 	return e
 }
 
 func (e *Event) SliceLenLess(x interface{}, n int) *Event {
 	if !isSlice(x) {
-		panic("gassert.SliceLenLess: only slice type acceptable")
+		panic("gassert.Event.SliceLenLess: only slice type acceptable")
 	}
 
 	if lenLess(x, n) {
-		e.addError("slice length equals")
+		e.appendError(lenLessError("slice"))
 	}
 	return e
 }
 
 func (e *Event) SliceLenLessOrEquals(x interface{}, n int) *Event {
 	if !isSlice(x) {
-		panic("gassert.SliceLenLessOrEquals: only slice type acceptable")
+		panic("gassert.Event.SliceLenLessOrEquals: only slice type acceptable")
 	}
 
 	if lenLessOrEquals(x, n) {
-		e.addError("slice length equals")
+		e.appendError(lenLessOrEqualsError("slice"))
 	}
 	return e
 }
 
 func (e *Event) SliceLenGreater(x interface{}, n int) *Event {
 	if !isSlice(x) {
-		panic("gassert.SliceLenGreater: only slice type acceptable")
+		panic("gassert.Event.SliceLenGreater: only slice type acceptable")
 	}
 
 	if lenGreater(x, n) {
-		e.addError("slice length equals")
+		e.appendError(lenGreaterError("slice"))
 	}
 	return e
 }
 
 func (e *Event) SliceLenGreaterOrEquals(x interface{}, n int) *Event {
 	if !isSlice(x) {
-		panic("gassert.SliceLenGreaterOrEquals: only slice type acceptable")
+		panic("gassert.Event.SliceLenGreaterOrEquals: only slice type acceptable")
 	}
 
 	if lenGreaterOrEquals(x, n) {
-		e.addError("slice length equals")
+		e.appendError(lenGreaterOrEqualsError("slice"))
 	}
 	return e
 }
 
 func (e *Event) SliceCapEquals(x interface{}, n int) *Event {
 	if !isSlice(x) {
-		panic("gassert.SliceCapEquals: only slice type acceptable")
+		panic("gassert.Event.SliceCapEquals: only slice type acceptable")
 	}
 
 	if sliceCapEquals(x, n) {
-		e.addError("slice capacity equals")
+		e.appendError(capEqualsError("slice"))
 	}
 	return e
 }
 
 func (e *Event) SliceCapNotEquals(x interface{}, n int) *Event {
 	if !isSlice(x) {
-		panic("gassert.SliceCapNotEquals: only slice type acceptable")
+		panic("gassert.Event.SliceCapNotEquals: only slice type acceptable")
 	}
 
 	if !sliceCapEquals(x, n) {
-		e.addError("slice capacity not equals")
+		e.appendError(capNotEqualsError("slice"))
 	}
 	return e
 }
 
 func (e *Event) SliceCapLess(x interface{}, n int) *Event {
 	if !isSlice(x) {
-		panic("gassert.SliceCapLess: only slice type acceptable")
+		panic("gassert.Event.SliceCapLess: only slice type acceptable")
 	}
 
 	if sliceCapLess(x, n) {
-		e.addError("slice capacity equals")
+		e.appendError(capLessError("slice"))
 	}
 	return e
 }
 
 func (e *Event) SliceCapLessOrEquals(x interface{}, n int) *Event {
 	if !isSlice(x) {
-		panic("gassert.SliceCapLessOrEquals: only slice type acceptable")
+		panic("gassert.Event.SliceCapLessOrEquals: only slice type acceptable")
 	}
 
 	if sliceCapLessOrEquals(x, n) {
-		e.addError("slice capacity equals")
+		e.appendError(capLessOrEqualsError("slice"))
 	}
 	return e
 }
 
 func (e *Event) SliceCapGreater(x interface{}, n int) *Event {
 	if !isSlice(x) {
-		panic("gassert.SliceCapGreater: only slice type acceptable")
+		panic("gassert.Event.SliceCapGreater: only slice type acceptable")
 	}
 
 	if sliceCapGreater(x, n) {
-		e.addError("slice capacity equals")
+		e.appendError(capGreaterError("slice"))
 	}
 	return e
 }
 
 func (e *Event) SliceCapGreaterOrEquals(x interface{}, n int) *Event {
 	if !isSlice(x) {
-		panic("gassert.SliceCapGreaterOrEquals: only slice type acceptable")
+		panic("gassert.Event.SliceCapGreaterOrEquals: only slice type acceptable")
 	}
 
 	if sliceCapGreaterOrEquals(x, n) {
-		e.addError("slice capacity equals")
+		e.appendError(capGreaterOrEqualsError("slice"))
 	}
 	return e
 }
 
 func (e *Event) MapLenEquals(x interface{}, n int) *Event {
 	if !isMap(x) {
-		panic("gassert.MapLenEquals: only map type acceptable")
+		panic("gassert.Event.MapLenEquals: only map type acceptable")
 	}
 
 	if lenEquals(x, n) {
-		e.addError("map length equals")
+		e.appendError(lenEqualsError("map"))
 	}
 	return e
 }
 
 func (e *Event) MapLenNotEquals(x interface{}, n int) *Event {
 	if !isMap(x) {
-		panic("gassert.MapLenNotEquals: only map type acceptable")
+		panic("gassert.Event.MapLenNotEquals: only map type acceptable")
 	}
 
 	if !lenEquals(x, n) {
-		e.addError("map length not equals")
+		e.appendError(lenNotEqualsError("map"))
 	}
 	return e
 }
 
 func (e *Event) MapLenLess(x interface{}, n int) *Event {
 	if !isMap(x) {
-		panic("gassert.MapLenLess: only map type acceptable")
+		panic("gassert.Event.MapLenLess: only map type acceptable")
 	}
 
 	if lenLess(x, n) {
-		e.addError("map length equals")
+		e.appendError(lenLessError("map"))
 	}
 	return e
 }
 
 func (e *Event) MapLenLessOrEquals(x interface{}, n int) *Event {
 	if !isMap(x) {
-		panic("gassert.MapLenLessOrEquals: only map type acceptable")
+		panic("gassert.Event.MapLenLessOrEquals: only map type acceptable")
 	}
 
 	if lenLessOrEquals(x, n) {
-		e.addError("map length equals")
+		e.appendError(lenLessOrEqualsError("map"))
 	}
 	return e
 }
 
 func (e *Event) MapLenGreater(x interface{}, n int) *Event {
 	if !isMap(x) {
-		panic("gassert.MapLenGreater: only map type acceptable")
+		panic("gassert.Event.MapLenGreater: only map type acceptable")
 	}
 
 	if lenGreater(x, n) {
-		e.addError("map length equals")
+		e.appendError(lenGreaterError("map"))
 	}
 	return e
 }
 
 func (e *Event) MapLenGreaterOrEquals(x interface{}, n int) *Event {
 	if !isMap(x) {
-		panic("gassert.MapLenGreaterOrEquals: only map type acceptable")
+		panic("gassert.Event.MapLenGreaterOrEquals: only map type acceptable")
 	}
 
 	if lenGreaterOrEquals(x, n) {
-		e.addError("map length equals")
+		e.appendError(lenGreaterOrEqualsError("map"))
 	}
 	return e
 }
@@ -443,21 +448,36 @@ func (e *Event) MapLenGreaterOrEquals(x interface{}, n int) *Event {
 func (e *Event) Panic() {
 	defer putEvent(e)
 	if len(e.errs) > 0 {
-		panic("gAssert trigger panic\n\tdfdf\n")
+		panic("gAssertError")
 	}
+}
+
+func (e *Event) PanicDetails() {
+	defer putEvent(e)
+	if len(e.errs) > 0 {
+		panic(Errors(e.errs))
+	}
+
 }
 
 func (e *Event) Err() error {
 	defer putEvent(e)
 	if len(e.errs) > 0 {
-		pc, _, _, _ := runtime.Caller(1)
+		pc, _, line, _ := runtime.Caller(1)
 		callerName := runtime.FuncForPC(pc).Name()
-
-		return fmt.Errorf("gAssertError: %s", callerName)
+		return fmt.Errorf("gAssertError: %s, line %d", callerName, line)
 	}
 	return nil
 }
 
-func (e *Event) addError(format string, a ...interface{}) {
-	e.errs = append(e.errs, fmt.Errorf(format, a...))
+func (e *Event) ErrDetails() error {
+	defer putEvent(e)
+	if len(e.errs) > 0 {
+		return Errors(e.errs)
+	}
+	return nil
+}
+
+func (e *Event) appendError(err error) {
+	e.errs = append(e.errs, err)
 }
