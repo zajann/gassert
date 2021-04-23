@@ -7,6 +7,9 @@ import (
 )
 
 func main() {
+	n := 15
+	s := "abc"
+	gassert.Go((n-5)%10 == 0 || len(s)*2 > 10)
 
 }
 
@@ -18,14 +21,6 @@ func SingleWithPanic(n int) {
 	gassert.NotEquals(n, 11)
 
 	gassert.Zeros(n)
-}
-
-func SingleWithError(n int) {
-
-}
-
-func MultiWithPanic(n int, s string, ss []string, m map[string]int) {
-
 }
 
 func MultiWithError(n int, s string, ss []string, m map[string]int) {
