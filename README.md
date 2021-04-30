@@ -22,8 +22,8 @@ With `gassert`, you can write that:
 
 ```go
 func MyFunc(n int, s string, arr []string, p *MyStruct) {
-  gassert.Zeros(n, s, arr, p)
-  // raise panic if any of them has zero-value
+  	// raise panic if any of them has zero-value
+	gassert.Zeros(n, s, arr, p)
 }
 ```
 
@@ -31,10 +31,10 @@ And you can check other conditions besides zero-value.
 
 ```go
 func MyFunc(n int, s string, arr []string, p *MyStruct) {
-  gassert.NumLess(n, 100)
-  gassert.StrLenGreater(s, 10)
-  gassert.SliceLenEquals(arr, 0)
-  gassert.Zeros(p)
+  	gassert.NumLess(n, 100)
+  	gassert.StrLenGreater(s, 10)
+  	gassert.SliceLenEquals(arr, 0)
+  	gassert.Zeros(p)
 }
 ```
 
@@ -44,12 +44,12 @@ If you want to check multiple condition on one line, you can write below:
 
 ```go
 func MyFunc(n int, s string, arr []string, p *MyStruct) {
-  gassert.New().NumLess(n, 5).StrLenGreater(s, 10).SliceLenEquals(arr, 0).Zeros(0).Panic()
   	// raise panic if any of conditions is true
+  	gassert.New().NumLess(n, 5).StrLenGreater(s, 10).SliceLenEquals(arr, 0).Zeros(0).Panic()
   
-  if err := gassert.New().NumLess(n, 5).StrLenGreater(s, 10).SliceLenEquals(arr, 0).Zeros(0).Err(); err != nil {
-    // handle error
-  }
+  	if err := gassert.New().NumLess(n, 5).StrLenGreater(s, 10).SliceLenEquals(arr, 0).Zeros(0).Err(); err != nil {
+    	// handle error
+  	}
 }
 ```
 
@@ -68,7 +68,7 @@ But `gassert` compares its values no matter what types.  For example, you can wr
 
 ```go
 func MyFunc(n int) {
-  gassert.NumLess(n, 12.34)
+  	gassert.NumLess(n, 12.34)
 }
 ```
 
@@ -84,7 +84,7 @@ If you want to check complex condition which doesn't exists in `gassert`. You ca
 
 ```go
 func MyFunc(n int, s string) {
-  gassert.Go((n-5) % 10 == 10 || len(s)*2 > 10)
+  	gassert.Go((n-5) % 10 == 10 || len(s)*2 > 10)
 }
 ```
 
